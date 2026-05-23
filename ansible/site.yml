@@ -1,0 +1,6 @@
+---
+- name: Despliegue de Servidor de Monitoreo de Base de Datos
+  hosts: dbservers
+  become: true  # Esto es clave para que ejecute los comandos como 'sudo'
+  roles:
+    - percona_server

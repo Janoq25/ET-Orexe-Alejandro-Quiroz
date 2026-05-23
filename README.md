@@ -42,8 +42,24 @@ multipass exec servidor-orexe -- bash -c "echo '$(cat ~/.ssh/id_rsa.pub)' >> ~/.
 ```
 
 ### 3. Configurar el Inventario
-El archivo inventory.yaml contiene la dirección IP de la instancia y los parámetros de conexión necesarios para Ansible.
+El archivo inventory.yml contiene la dirección IP de la instancia y los parámetros de conexión necesarios para Ansible.
 
----
+## Configuracion de roles
 
+### 1. percona_server
 
+Creamos la carpeta ansible/roles y ejecutamos el siguiente comando para generar la estructura del rol con ansible:
+
+```bash
+ansible-galaxy role init roles/percona_server
+```
+
+Dentro de la carpeta que acabamos de crear: percona_server. Redactamos el playbook en el archivo main.yml con todos los pasos, para poder instalr percona server en nuestro servidor
+
+Tambien configuramos el archivo site.yml, aque servidor debe conectarse y a que es lo que debe hacer en el servidor, osea lo que esta dentro del rol percona_server
+
+finalmente ejecutamos el siguiente comando para instalar percona server en los servidores:
+
+```bash
+ansible-playbook -i inventory.yml site.yml
+```

@@ -1,0 +1,56 @@
+---
+# tasks file for roles/percona_server
+
+- name: Actualizar la caché de paquetes de apt
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Instalar dependencias previas
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg2
+      - lsb-release
+    state: present
+
+- name: Descargar el paquete oficial de Percona
+  ansible.builtin.get_url:
+    url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    dest: /tmp/percona-release_latest.generic_all.deb
+    mode: '0644'
+
+- name: Instalar el paquete de configuración de repositorios
+  ansible.builtin.apt:
+    deb: /tmp/percona-release_latest.generic_all.deb
+
+- name: Configurar Percona Server 8.4 LTS
+  ansible.builtin.command: percona-release setup ps-84-lts --scheme https
+  register: percona_setup
+  changed_when: "'Ready' in percona_setup.stdout"
+
+# Ubuntu 26.04 (resolute) aún no tiene paquetes compilados en Percona
+# Voy a usar el repo de la version noble (24.04) que es compatible
+- name: Reemplazar resolute por noble en el repo de Percona
+  ansible.builtin.replace:
+    path: "{{ item }}"
+    regexp: '\bresolute\b'
+    replace: 'noble'
+  loop:
+    - /etc/apt/sources.list.d/percona-ps-84-lts-release.list
+    - /etc/apt/sources.list.d/percona-ps-84-lts-release.list.bak
+
+- name: Forzar actualización de caché de apt
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 0
+
+- name: Instalar Percona Server
+  ansible.builtin.apt:
+    name: percona-server-server
+    state: present
+
+- name: Asegurar que el servicio MySQL esté iniciado y habilitado
+  ansible.builtin.systemd:
+    name: mysql
+    state: started
+    enabled: yes
