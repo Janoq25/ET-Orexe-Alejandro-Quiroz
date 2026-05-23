@@ -49,8 +49,40 @@
     name: percona-server-server
     state: present
 
-- name: Asegurar que el servicio MySQL esté iniciado y habilitado
+- name: Asegurar que el servicio de MySQL esté iniciado y activo (systemd)
   ansible.builtin.systemd:
     name: mysql
     state: started
     enabled: yes
+
+- name: Copiar configuración personalizada de my.cnf
+  ansible.builtin.template:
+    src: my.cnf.j2
+    dest: /etc/mysql/my.cnf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reiniciar MySQL
+
+- name: Instalar extensiones de Python para gestionar MySQL
+  ansible.builtin.apt:
+    name:
+      - python3-pymysql
+    state: present
+
+
+- name: Establecer contraseña para el usuario root
+  ansible.builtin.command: >
+    mysql -u root -S /var/run/mysqld/mysqld.sock -e
+    "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_root_password }}';"
+  no_log: true
+  changed_when: true
+
+- name: Crear usuario ansible_test_user con permisos de solo lectura
+  ansible.builtin.command: >
+    mysql -u root -S /var/run/mysqld/mysqld.sock -e
+    "CREATE USER IF NOT EXISTS 'ansible_test_user'@'%' IDENTIFIED BY '{{ ansible_test_password }}';
+     GRANT SELECT ON *.* TO 'ansible_test_user'@'%';
+     FLUSH PRIVILEGES;"
+  no_log: true
+  changed_when: true

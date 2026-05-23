@@ -1,3 +1,7 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# handlers file for roles/percona_server
+# Handlers para el rol percona_server
+
+- name: Reiniciar MySQL
+  ansible.builtin.service:
+    name: mysql
+    state: restarted
