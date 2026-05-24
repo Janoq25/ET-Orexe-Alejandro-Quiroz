@@ -7,3 +7,4 @@
     - pmm_client
     - role: chaos_mysql
       when: chaos_mode | default(false) | bool
+      

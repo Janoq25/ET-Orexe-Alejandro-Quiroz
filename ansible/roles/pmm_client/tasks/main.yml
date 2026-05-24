@@ -32,7 +32,6 @@
   failed_when: pmm_config.rc != 0 and 'already exists' not in pmm_config.stdout
   no_log: true
 
-
 - name: Agregar servicio MySQL a PMM
   ansible.builtin.command: >
     pmm-admin add mysql

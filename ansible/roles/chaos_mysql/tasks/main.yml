@@ -1,4 +1,3 @@
-
 # tasks file for chaos_mysql
 - name: Chaos MySQL - Detener el servicio MySQL
   ansible.builtin.systemd:
@@ -25,3 +24,4 @@
   async: 600
   poll: 15
   when: chaos_mode | default(false) | bool
+  
