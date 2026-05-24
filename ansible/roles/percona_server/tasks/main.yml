@@ -1,9 +1,9 @@
 ---
-# tasks file for roles/percona_server
+
 
 - name: Actualizar la caché de paquetes de apt
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
 
 - name: Instalar dependencias previas
   ansible.builtin.apt:
@@ -41,8 +41,7 @@
 
 - name: Forzar actualización de caché de apt
   ansible.builtin.apt:
-    update_cache: yes
-    cache_valid_time: 0
+    update_cache: true
 
 - name: Instalar Percona Server
   ansible.builtin.apt:
@@ -53,7 +52,7 @@
   ansible.builtin.systemd:
     name: mysql
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Copiar configuración personalizada de my.cnf
   ansible.builtin.template:

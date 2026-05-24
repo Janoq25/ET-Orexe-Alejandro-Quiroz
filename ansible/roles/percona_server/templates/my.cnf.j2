@@ -18,7 +18,6 @@ lc-messages-dir  = /usr/share/mysql
 max_connections         = {{ mysql_max_connections }}
 innodb_buffer_pool_size = {{ mysql_innodb_buffer_pool_size }}
 
-# Red y Seguridad Externa
 # El valor 0.0.0.0 permite que Percona escuche conexiones provenientes de cualquier IP.
-# Esto es CRÍTICO para que tu script de Python en WSL o el PMM Server puedan conectarse a la VM.
+# Esto es CRÍTICO para que el script de Python en WSL o el PMM Server puedan conectarse a la VM.
 bind-address           = 0.0.0.0

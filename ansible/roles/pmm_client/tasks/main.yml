@@ -14,7 +14,7 @@
 
 - name: Actualizar caché de apt
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 0
 
 - name: Instalar PMM Client
@@ -26,10 +26,12 @@
   ansible.builtin.command: >
     pmm-admin config
     --server-insecure-tls
-    --server-url=https://admin:admin@{{ pmm_server_ip }}:443
+    --server-url=https://{{ pmm_admin_user }}:{{ pmm_admin_password }}@{{ pmm_server_ip }}:443
   register: pmm_config
   changed_when: "'Connected' in pmm_config.stdout"
-  failed_when: pmm_config.rc != 0
+  failed_when: pmm_config.rc != 0 and 'already exists' not in pmm_config.stdout
+  no_log: true
+
 
 - name: Agregar servicio MySQL a PMM
   ansible.builtin.command: >
@@ -40,5 +42,8 @@
     --service-name=mysql-orexe
   register: pmm_mysql
   changed_when: "'MySQL Service added' in pmm_mysql.stdout"
-  failed_when: pmm_mysql.rc != 0 and 'already exists' not in pmm_mysql.stderr
+  failed_when: >-
+    pmm_mysql.rc != 0
+    and 'already exists' not in pmm_mysql.stdout
+    and 'already exists' not in pmm_mysql.stderr
   no_log: true

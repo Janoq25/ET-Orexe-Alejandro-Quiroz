@@ -1,9 +1,10 @@
 # Archivos temporales de Python
 __pycache__/
-venv/
 
 # Archivos de error de Ansible
 *.retry
 
 # Archivos ocultos del sistema
 .DS_Store
+
+.vault_pass

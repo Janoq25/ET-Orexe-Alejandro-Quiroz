@@ -1,8 +1,9 @@
 ---
 - name: Despliegue de Servidor de Monitoreo de Base de Datos
   hosts: dbservers
-  become: true  # Esto es clave para que ejecute los comandos como 'sudo'
+  become: true  # para ejecutar comandos como sudo
   roles:
     - percona_server
     - pmm_client
-    - chaos_mysql
+    - role: chaos_mysql
+      when: chaos_mode | default(false) | bool

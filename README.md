@@ -17,7 +17,9 @@ Automatización del despliegue de **Percona Server (MySQL)**, registro en **PMM 
 │       ├── pmm_client/             # Cliente PMM y registro en el servidor
 │       └── chaos_mysql/            # Simulación de caída controlada de MySQL
 ├── verify_connection.py            # Script de validación de conexión
-├── requirements.txt                # Dependencias Python (pymysql)
+├── .ansible-lint                   # Configuración de ansible-lint
+├── .github/workflows/
+│   └── ansible-lint.yml            # CI: validación Ansible en GitHub Actions
 └── README.md
 ```
 
@@ -72,11 +74,12 @@ dbservers:
 
 Los secretos se guardan cifrados en `ansible/group_vars/all/vault.yml`:
 
-| Variable en Vault | Uso |
-|-------------------|-----|
-| `vault_mysql_root_password` | Contraseña del usuario `root` de MySQL |
-| `vault_ansible_test_password` | Contraseña de `ansible_test_user` |
-| `vault_pmm_server_ip` | IP del PMM Server |
+
+`vault_mysql_root_password` : Contraseña del usuario `root` de MySQL 
+`vault_ansible_test_password` : Contraseña de `ansible_test_user` 
+`vault_pmm_server_ip` : IP del PMM Server 
+`vault_pmm_admin_user` : Usuario de administración del PMM Server 
+`vault_pmm_admin_password` : Contraseña de administración del PMM Server 
 
 Las variables públicas en `ansible/group_vars/all/vars.yml` referencian esos valores:
 
@@ -84,6 +87,8 @@ Las variables públicas en `ansible/group_vars/all/vars.yml` referencian esos va
 mysql_root_password: "{{ vault_mysql_root_password }}"
 ansible_test_password: "{{ vault_ansible_test_password }}"
 pmm_server_ip: "{{ vault_pmm_server_ip }}"
+pmm_admin_user: "{{ vault_pmm_admin_user }}"
+pmm_admin_password: "{{ vault_pmm_admin_password }}"
 ```
 
 ### Crear o editar secretos
@@ -105,9 +110,10 @@ Contenido de ejemplo del vault:
 vault_mysql_root_password: "tu_password_root"
 vault_ansible_test_password: "tu_password_test"
 vault_pmm_server_ip: "192.168.x.x"
+vault_pmm_admin_user: "admin"
+vault_pmm_admin_password: "admin"
 ```
 
-> **Nota:** El archivo `vault.yml` cifrado sí se commitea al repositorio. La contraseña del vault **no** debe subirse a Git.
 
 ## 3. Ejecutar el playbook
 
@@ -115,7 +121,7 @@ Desde la carpeta `ansible/`:
 
 ```bash
 cd ansible
-ansible-playbook -i inventory.yml site.yml --ask-vault-pass
+ansible-playbook -i inventory.yml site.yml --ask-vault-pass 
 ```
 
 El playbook `site.yml` aplica los tres roles en orden:
@@ -160,7 +166,7 @@ Simulación de error controlado para validar resiliencia básica:
 2. Espera 60 segundos
 3. Reinicia el servicio
 
-Por defecto **no se ejecuta**. Para activarlo:
+Por defecto no se ejecuta. Para activarlo:
 
 ```bash
 ansible-playbook -i inventory.yml site.yml --ask-vault-pass -e "chaos_mode=true"
@@ -176,15 +182,6 @@ En Ubuntu/WSL moderno, usa el paquete del sistema:
 
 ```bash
 sudo apt install python3-pymysql
-```
-
-Alternativa con entorno virtual:
-
-```bash
-sudo apt install python3-venv
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
 ```
 
 ### Ejecutar
@@ -207,11 +204,20 @@ OK: Conexión exitosa. SELECT 1 ejecutado correctamente.
 
 ## 5. Validación continua (GitHub Actions)
 
-El workflow en `.github/workflows/ansible-lint.yml` ejecuta **ansible-lint** en cada push y pull request para validar la calidad del código Ansible.
+El workflow en `.github/workflows/ansible-lint.yml` ejecuta ansible-lint en:
 
-## Referencias
+- Push a `feature/evaluacion-orexe` o `main`
+- Pull request hacia `main`
 
-- [Documentación de Percona](https://docs.percona.com/)
-- [Documentación de Ansible](https://docs.ansible.com/)
-- [Percona Monitoring and Management](https://docs.percona.com/percona-monitoring-and-management/index.html)
-- [ansible-lint](https://github.com/ansible/ansible-lint)
+La configuración está en `.ansible-lint` (excluye `vault.yml` cifrado y usa variables ficticias para el análisis estático).
+
+
+## Notas técnicas
+ 
+Durante el desarrollo se encontraron los siguientes problemas y soluciones:
+ 
+**Ubuntu 26.04 (Resolute) no soportado oficialmente por Percona**
+El repositorio de Percona para resolute existe pero está vacío. Se usa el repositorio de noble (Ubuntu 24.04) que es compatible binariamente.
+ 
+**PMM Server en Docker**
+PMM Server corre en una VM dedicada (`pmm-server`) con Ubuntu 24.04, Docker y 2GB de RAM + 2GB de swap.

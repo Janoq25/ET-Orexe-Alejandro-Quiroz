@@ -4,6 +4,8 @@
 mysql_root_password: "{{ vault_mysql_root_password }}"
 ansible_test_password: "{{ vault_ansible_test_password }}"
 pmm_server_ip: "{{ vault_pmm_server_ip }}"
+pmm_admin_user: "{{ vault_pmm_admin_user }}"
+pmm_admin_password: "{{ vault_pmm_admin_password }}"
 
 # Configuraciones Personalizadas para el Motor Percona Server (my.cnf)
 mysql_max_connections: 100
