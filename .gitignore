@@ -1,5 +1,6 @@
 # Archivos temporales de Python
 __pycache__/
+venv/
 
 # Archivos de error de Ansible
 *.retry
