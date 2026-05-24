@@ -22,8 +22,8 @@
 
 - name: Configurar Percona Server 8.4 LTS
   ansible.builtin.command: percona-release setup ps-84-lts --scheme https
-  register: percona_setup
-  changed_when: "'Ready' in percona_setup.stdout"
+  register: percona_server_setup
+  changed_when: "'Ready' in percona_server_setup.stdout"
 
 # Ubuntu 26.04 (resolute) aún no tiene paquetes compilados en Percona
 # Voy a usar el repo de la version noble (24.04) que es compatible

@@ -24,4 +24,3 @@
   async: 600
   poll: 15
   when: chaos_mode | default(false) | bool
-  

@@ -2,7 +2,7 @@
 name: ansible-lint
 
 # Fuerza a GitHub a usar Node.js 24 de forma nativa
-env:
+env:  
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
