@@ -1,0 +1,18 @@
+
+# tasks file for chaos_mysql
+- name: Chaos MySQL - Detener el servicio MySQL
+  ansible.builtin.systemd:
+    name: mysql
+    state: stopped
+  when: chaos_mode | default(false) | bool
+
+- name: Chaos MySQL - Esperar 60 segundos
+  ansible.builtin.pause:
+    seconds: 60
+  when: chaos_mode | default(false) | bool
+
+- name: Chaos MySQL - Reiniciar el servicio MySQL
+  ansible.builtin.systemd:
+    name: mysql
+    state: started
+  when: chaos_mode | default(false) | bool

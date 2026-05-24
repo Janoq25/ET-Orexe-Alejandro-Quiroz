@@ -3,4 +3,4 @@
   hosts: dbservers
   become: true  # Esto es clave para que ejecute los comandos como 'sudo'
   roles:
-    - percona_server
+    - pmm_client
