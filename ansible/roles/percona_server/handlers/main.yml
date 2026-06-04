@@ -1,0 +1,7 @@
+---
+# Handlers para el rol percona_server
+
+- name: Reiniciar MySQL
+  ansible.builtin.service:
+    name: mysql
+    state: restarted

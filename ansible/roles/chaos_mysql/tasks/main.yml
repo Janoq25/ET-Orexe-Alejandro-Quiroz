@@ -1,0 +1,26 @@
+# tasks file for chaos_mysql
+- name: Chaos MySQL - Detener el servicio MySQL
+  ansible.builtin.systemd:
+    name: mysql
+    state: stopped
+  when: chaos_mode | default(false) | bool
+
+- name: Chaos MySQL - Esperar 60 segundos
+  ansible.builtin.pause:
+    seconds: 60
+  when: chaos_mode | default(false) | bool
+
+- name: Chaos MySQL - Aviso de recuperación InnoDB
+  ansible.builtin.debug:
+    msg: >-
+      Reiniciando MySQL. Tras un apagado brusco, InnoDB puede tardar 2-3 minutos
+      en inicializar. Ansible mostrará progreso cada 15 segundos; no interrumpas.
+  when: chaos_mode | default(false) | bool
+
+- name: Chaos MySQL - Reiniciar el servicio MySQL
+  ansible.builtin.systemd:
+    name: mysql
+    state: started
+  async: 600
+  poll: 15
+  when: chaos_mode | default(false) | bool

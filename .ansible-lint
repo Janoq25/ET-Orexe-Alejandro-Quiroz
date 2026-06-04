@@ -1,0 +1,22 @@
+---
+# Configuración de ansible-lint (CI y local).
+# Ejecutar desde ansible/: ansible-lint site.yml roles
+
+profile: production
+
+exclude_paths:
+  - .github/
+  - ansible/group_vars/all/vault.yml
+  - '**/tests/**'
+
+# Variables ficticias para analizar vars.yml sin descifrar Vault
+extra_vars:
+  vault_mysql_root_password: lint-only
+  vault_ansible_test_password: lint-only
+  vault_pmm_server_ip: 127.0.0.1
+  vault_pmm_admin_user: admin
+  vault_pmm_admin_password: lint-only
+
+# pmm-admin y mysql CLI no tienen módulos Ansible equivalentes aquí
+skip_list:
+  - command-instead-of-module

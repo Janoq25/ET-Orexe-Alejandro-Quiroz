@@ -1,0 +1,48 @@
+- name: Habilitar repositorio de PMM3 client
+  ansible.builtin.command: percona-release enable pmm3-client release --scheme https
+  register: pmm_client_repo
+  changed_when: "'Enabled' in pmm_client_repo.stdout"
+  failed_when: pmm_client_repo.rc != 0 and 'not supported' not in pmm_client_repo.stdout
+
+- name: Agregar manualmente el repo de PMM3 client para noble
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/percona-pmm3-client-release.list
+    content: |
+      deb [signed-by=/usr/share/keyrings/percona-keyring.gpg] https://repo.percona.com/pmm3-client/apt noble main
+      deb-src [signed-by=/usr/share/keyrings/percona-keyring.gpg] https://repo.percona.com/pmm3-client/apt noble main
+    mode: '0644'
+
+- name: Actualizar caché de apt
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 0
+
+- name: Instalar PMM Client
+  ansible.builtin.apt:
+    name: pmm-client
+    state: present
+
+- name: Registrar nodo en PMM Server
+  ansible.builtin.command: >
+    pmm-admin config
+    --server-insecure-tls
+    --server-url=https://{{ pmm_admin_user }}:{{ pmm_admin_password }}@{{ pmm_server_ip }}:443
+  register: pmm_client_config
+  changed_when: "'Connected' in pmm_client_config.stdout"
+  failed_when: pmm_client_config.rc != 0 and 'already exists' not in pmm_client_config.stdout
+  no_log: true
+
+- name: Agregar servicio MySQL a PMM
+  ansible.builtin.command: >
+    pmm-admin add mysql
+    --username=root
+    --password={{ mysql_root_password }}
+    --socket=/var/run/mysqld/mysqld.sock
+    --service-name=mysql-orexe
+  register: pmm_client_mysql
+  changed_when: "'MySQL Service added' in pmm_client_mysql.stdout"
+  failed_when: >-
+    pmm_client_mysql.rc != 0
+    and 'already exists' not in pmm_client_mysql.stdout
+    and 'already exists' not in pmm_client_mysql.stderr
+  no_log: true

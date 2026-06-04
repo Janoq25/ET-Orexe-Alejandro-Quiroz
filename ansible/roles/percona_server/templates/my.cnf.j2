@@ -1,0 +1,21 @@
+# Archivo de Configuración Personalizado - OREXE 2026
+# Gestionado automáticamente por Ansible - Modificaciones manuales serán sobrescritas
+
+[mysqld]
+# Configuración de Rutas de Sistema y Ejecución
+user             = mysql
+pid-file         = /var/run/mysqld/mysqld.pid
+socket           = /var/run/mysqld/mysqld.sock
+port             = 3306
+basedir          = /usr
+datadir          = /var/lib/mysql
+tmpdir           = /tmp
+lc-messages-dir  = /usr/share/mysql
+
+# Optimización y Rendimiento (Variables Dinámicas)
+max_connections         = {{ mysql_max_connections }}
+innodb_buffer_pool_size = {{ mysql_innodb_buffer_pool_size }}
+
+# El valor 0.0.0.0 permite que Percona escuche conexiones provenientes de cualquier IP.
+# Esto es CRÍTICO para que el script de Python en WSL o el PMM Server puedan conectarse a la VM.
+bind-address           = 0.0.0.0
